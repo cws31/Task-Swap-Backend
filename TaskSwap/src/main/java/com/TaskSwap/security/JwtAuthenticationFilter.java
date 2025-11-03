@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicPath(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Keep public endpoints here
+
         return path.startsWith("/api/auth/register") || path.startsWith("/api/auth/login")
                 || path.startsWith("/actuator");
     }
@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // Skip for public endpoints
         if (isPublicPath(request)) {
             filterChain.doFilter(request, response);
             return;
