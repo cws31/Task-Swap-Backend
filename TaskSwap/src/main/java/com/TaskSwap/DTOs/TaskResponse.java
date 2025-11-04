@@ -1,9 +1,7 @@
 package com.TaskSwap.DTOs;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
-
 import com.TaskSwap.enums.RewardType;
 import com.TaskSwap.enums.TaskStatus;
 
@@ -22,4 +20,5 @@ public class TaskResponse {
     private TaskStatus status;
     private String createdBy;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt; // ✅ new field
 }

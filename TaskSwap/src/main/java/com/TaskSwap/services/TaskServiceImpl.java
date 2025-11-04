@@ -71,6 +71,7 @@ public class TaskServiceImpl implements TaskService {
                 .status(task.getStatus())
                 .createdBy(task.getCreatedBy().getUsername())
                 .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt()) // ✅ include this
                 .build();
     }
 
