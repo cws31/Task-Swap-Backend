@@ -51,9 +51,23 @@ public class AuthService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            // Generate JWT token
             String token = jwtUtil.generateToken(userDetails.getUsername());
 
-            return ResponseEntity.ok(new JwtResponse(token, "Bearer", jwtUtil.getExpirationInMs()));
+            // Fetch the user entity to get full name
+            User user = userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Return enriched JWT response
+            JwtResponse jwtResponse = new JwtResponse(
+                    token,
+                    "Bearer",
+                    jwtUtil.getExpirationInMs(),
+                    user.getUsername(),
+                    user.getFullName());
+
+            return ResponseEntity.ok(jwtResponse);
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Invalid username/email or password");
@@ -61,4 +75,5 @@ public class AuthService {
             return ResponseEntity.status(401).body("Authentication failed");
         }
     }
+
 }
