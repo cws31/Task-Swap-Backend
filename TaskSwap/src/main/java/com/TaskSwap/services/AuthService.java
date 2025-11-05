@@ -52,20 +52,18 @@ public class AuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-            // Generate JWT token
             String token = jwtUtil.generateToken(userDetails.getUsername());
 
-            // Fetch the user entity to get full name
             User user = userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Return enriched JWT response
             JwtResponse jwtResponse = new JwtResponse(
                     token,
                     "Bearer",
                     jwtUtil.getExpirationInMs(),
                     user.getUsername(),
-                    user.getFullName());
+                    user.getFullName(),
+                    user.getEmail());
 
             return ResponseEntity.ok(jwtResponse);
 
