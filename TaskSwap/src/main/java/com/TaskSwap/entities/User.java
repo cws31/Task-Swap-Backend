@@ -36,4 +36,5 @@ public class User {
 
     @Pattern(regexp = "^(USER|ADMIN)$", message = "Role must be USER or ADMIN")
     private String role = "USER";
+
 }

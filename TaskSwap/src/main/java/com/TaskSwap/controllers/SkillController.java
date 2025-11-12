@@ -23,7 +23,7 @@ public class SkillController {
             @Valid @RequestBody SkillRequest request,
             Authentication authentication) {
 
-        String username = authentication.getName(); // get logged-in user's username
+        String username = authentication.getName();
         return ResponseEntity.ok(skillService.createSkill(request, username));
     }
 
@@ -44,7 +44,7 @@ public class SkillController {
             @Valid @RequestBody SkillRequest request,
             Authentication authentication) {
 
-        String username = authentication.getName(); // logged-in user
+        String username = authentication.getName();
         SkillResponse updated = skillService.updateSkill(id, request, username);
         return ResponseEntity.ok(updated);
     }
