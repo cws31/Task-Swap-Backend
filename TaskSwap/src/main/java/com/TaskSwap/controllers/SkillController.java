@@ -56,7 +56,7 @@ public class SkillController {
 
         String username = authentication.getName();
         skillService.deleteSkill(id, username);
-        return ResponseEntity.ok("Skill deleted successfully");
+        return ResponseEntity.ok("Skill deleted successfully");//
     }
 
 }
