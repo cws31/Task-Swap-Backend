@@ -15,7 +15,7 @@ public class TaskResponse {
     private String description;
     private String category;
     private RewardType rewardType;
-    private Double rewardAmount;
+    private String rewardAmount;
     private String preferredSwapSkill;
     private TaskStatus status;
     private String createdBy;

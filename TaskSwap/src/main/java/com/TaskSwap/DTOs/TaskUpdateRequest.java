@@ -18,6 +18,6 @@ public class TaskUpdateRequest {
 
     private String category;
     private RewardType rewardType;
-    private Double rewardAmount;
+    private String rewardAmount;
     private String preferredSwapSkill;
 }

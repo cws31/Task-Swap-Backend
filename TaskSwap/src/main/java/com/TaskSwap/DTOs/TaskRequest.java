@@ -26,7 +26,7 @@ public class TaskRequest {
     @NotNull(message = "Reward type is required")
     private RewardType rewardType;
 
-    private Double rewardAmount;
+    private String rewardAmount;
 
     private String preferredSwapSkill;
 }

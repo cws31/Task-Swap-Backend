@@ -36,7 +36,7 @@ public class Task {
     @Column(nullable = false)
     private RewardType rewardType;
 
-    private Double rewardAmount;
+    private String rewardAmount;
 
     @Column(length = 100)
     private String preferredSwapSkill;
