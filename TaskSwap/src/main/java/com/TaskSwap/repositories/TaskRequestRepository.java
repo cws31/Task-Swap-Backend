@@ -21,7 +21,7 @@ public interface TaskRequestRepository extends JpaRepository<TaskRequest, Long> 
 
     boolean existsByRequesterAndSkillAndRequestType(User requester, Skill skill, RequestType type);
 
-    Optional<TaskRequest> findByRequesterAndTask(User requester, Task task);
+    Optional<TaskRequest> findTopByRequesterAndTaskOrderByCreatedAtDesc(User requester, Task task);
 
-    Optional<TaskRequest> findByRequesterAndSkill(User requester, Skill skill);
+    Optional<TaskRequest> findTopByRequesterAndSkillOrderByCreatedAtDesc(User requester, Skill skill);
 }

@@ -6,6 +6,7 @@ import com.TaskSwap.enums.*;
 import com.TaskSwap.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 public class TaskRequestService {
 
         private final TaskRequestRepository taskRequestRepository;
-        private final UserRepository userRepository;
         private final TaskRepository taskRepository;
         private final SkillRepository skillRepository;
         private final NotificationService notificationService;
@@ -35,9 +35,10 @@ public class TaskRequestService {
                                 throw new RuntimeException("You cannot request your own task");
                         }
 
-                        boolean alreadyRequested = taskRequestRepository
-                                        .existsByRequesterAndTaskAndRequestType(requester, task, RequestType.TASK);
-                        if (alreadyRequested) {
+                        Optional<TaskRequest> latestRequest = taskRequestRepository
+                                        .findTopByRequesterAndTaskOrderByCreatedAtDesc(requester, task);
+
+                        if (latestRequest.isPresent() && latestRequest.get().getStatus() == RequestStatus.PENDING) {
                                 throw new RuntimeException("You have already requested this task");
                         }
 
@@ -50,6 +51,8 @@ public class TaskRequestService {
                                         requester.getFullName() + " requested your task '" + task.getTitle() + "'",
                                         request);
 
+                        return toDTO(request);
+
                 } else if (type == RequestType.SKILL) {
                         Skill skill = skillRepository.findById(targetId)
                                         .orElseThrow(() -> new RuntimeException("Skill not found"));
@@ -58,9 +61,10 @@ public class TaskRequestService {
                                 throw new RuntimeException("You cannot request your own skill");
                         }
 
-                        boolean alreadyRequested = taskRequestRepository
-                                        .existsByRequesterAndSkillAndRequestType(requester, skill, RequestType.SKILL);
-                        if (alreadyRequested) {
+                        Optional<TaskRequest> latestRequest = taskRequestRepository
+                                        .findTopByRequesterAndSkillOrderByCreatedAtDesc(requester, skill);
+
+                        if (latestRequest.isPresent() && latestRequest.get().getStatus() == RequestStatus.PENDING) {
                                 throw new RuntimeException("You have already requested this skill");
                         }
 
@@ -72,69 +76,60 @@ public class TaskRequestService {
                                         skill.getUser(),
                                         requester.getFullName() + " requested your skill '" + skill.getTitle() + "'",
                                         request);
+
+                        return toDTO(request);
                 }
 
-                return new TaskRequestDTO(
-                                request.getId(),
-                                requester.getUsername(),
-                                request.getReceiver().getUsername(),
-                                request.getRequestType(),
-                                request.getStatus(),
-                                request.getCreatedAt());
+                throw new RuntimeException("Invalid request type");
         }
 
         public TaskRequestDTO respondToRequest(Long requestId, boolean accept) {
                 TaskRequest req = taskRequestRepository.findById(requestId)
                                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
+                String title = req.getRequestType() == RequestType.TASK ? req.getTask().getTitle()
+                                : req.getSkill().getTitle();
+
+                String message = "Your request for '" + title + "' has been " + (accept ? "accepted" : "rejected");
+                notificationService.sendNotification(req.getRequester(), message, req);
+
                 req.setStatus(accept ? RequestStatus.ACCEPTED : RequestStatus.REJECTED);
                 taskRequestRepository.save(req);
 
-                String message = "Your request for '" +
-                                (req.getRequestType() == RequestType.TASK
-                                                ? req.getTask().getTitle()
-                                                : req.getSkill().getTitle())
-                                + "' has been " + (accept ? "accepted" : "rejected");
-
-                notificationService.sendNotification(req.getRequester(), message, req);
-
-                return new TaskRequestDTO(
-                                req.getId(),
-                                req.getRequester().getUsername(),
-                                req.getReceiver().getUsername(),
-                                req.getRequestType(),
-                                req.getStatus(),
-                                req.getCreatedAt());
+                return toDTO(req);
         }
 
         public Map<String, List<TaskRequestDTO>> getAllRequestsForUser(User user) {
-
                 List<TaskRequestDTO> received = taskRequestRepository.findByReceiver(user)
                                 .stream()
-                                .map(req -> new TaskRequestDTO(
-                                                req.getId(),
-                                                req.getRequester().getUsername(),
-                                                req.getReceiver().getUsername(),
-                                                req.getRequestType(),
-                                                req.getStatus(),
-                                                req.getCreatedAt()))
+                                .map(this::toDTO)
                                 .collect(Collectors.toList());
 
                 List<TaskRequestDTO> sent = taskRequestRepository.findByRequester(user)
                                 .stream()
-                                .map(req -> new TaskRequestDTO(
-                                                req.getId(),
-                                                req.getRequester().getUsername(),
-                                                req.getReceiver().getUsername(),
-                                                req.getRequestType(),
-                                                req.getStatus(),
-                                                req.getCreatedAt()))
+                                .map(this::toDTO)
                                 .collect(Collectors.toList());
 
                 Map<String, List<TaskRequestDTO>> result = new HashMap<>();
                 result.put("receivedRequests", received);
                 result.put("sentRequests", sent);
-
                 return result;
+        }
+
+        private TaskRequestDTO toDTO(TaskRequest req) {
+                String title = req.getRequestType() == RequestType.TASK
+                                ? req.getTask().getTitle()
+                                : req.getSkill().getTitle();
+
+                return new TaskRequestDTO(
+                                req.getId(),
+                                req.getRequester().getUsername(),
+                                req.getReceiver().getUsername(),
+                                req.getRequester().getFullName(),
+                                req.getReceiver().getFullName(),
+                                title,
+                                req.getRequestType(),
+                                req.getStatus(),
+                                req.getCreatedAt());
         }
 }
