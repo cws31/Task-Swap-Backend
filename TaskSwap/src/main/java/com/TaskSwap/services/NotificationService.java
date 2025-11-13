@@ -5,6 +5,7 @@ import com.TaskSwap.DTOs.TaskRequestDTO;
 import com.TaskSwap.entities.Notification;
 import com.TaskSwap.entities.TaskRequest;
 import com.TaskSwap.entities.User;
+import com.TaskSwap.enums.RequestType;
 import com.TaskSwap.repositories.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -43,10 +44,22 @@ public class NotificationService {
                 TaskRequestDTO trDto = null;
                 if (notification.getTaskRequest() != null) {
                         TaskRequest tr = notification.getTaskRequest();
+
+                        // Determine title based on type
+                        String taskTitle = null;
+                        if (tr.getRequestType() == RequestType.TASK && tr.getTask() != null) {
+                                taskTitle = tr.getTask().getTitle();
+                        } else if (tr.getRequestType() == RequestType.SKILL && tr.getSkill() != null) {
+                                taskTitle = tr.getSkill().getTitle();
+                        }
+
                         trDto = new TaskRequestDTO(
                                         tr.getId(),
                                         tr.getRequester().getUsername(),
                                         tr.getReceiver().getUsername(),
+                                        tr.getRequester().getFullName(),
+                                        tr.getReceiver().getFullName(),
+                                        taskTitle,
                                         tr.getRequestType(),
                                         tr.getStatus(),
                                         tr.getCreatedAt());
@@ -60,4 +73,5 @@ public class NotificationService {
                                 notification.getReceiver() != null ? notification.getReceiver().getUsername() : null,
                                 trDto);
         }
+
 }
