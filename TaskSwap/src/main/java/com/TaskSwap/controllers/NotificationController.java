@@ -7,7 +7,7 @@ import com.TaskSwap.repositories.NotificationRepository;
 import com.TaskSwap.repositories.UserRepository;
 import com.TaskSwap.security.JwtUtil;
 import com.TaskSwap.services.NotificationService;
-
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,4 +82,17 @@ public class NotificationController {
         }
         throw new RuntimeException("Invalid Authorization header");
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<?> getMyNotificationCount(@RequestHeader("Authorization") String authHeader) {
+        User user = getUserFromToken(authHeader);
+
+        Long unreadCount = notificationRepository.countByReceiverAndIsReadFalse(user);
+        Long totalCount = notificationRepository.countByReceiver(user);
+
+        return ResponseEntity.ok(Map.of(
+                "unread", unreadCount,
+                "total", totalCount));
+    }
+
 }
