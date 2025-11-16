@@ -14,7 +14,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     Optional<Notification> findTopByReceiverOrderByCreatedAtDesc(User receiver);
 
-    Long countByReceiverAndIsReadFalse(User receiver); // 👈 unread notifications count
+    Long countByReceiverAndIsReadFalse(User receiver);
 
     Long countByReceiver(User receiver);
 }
