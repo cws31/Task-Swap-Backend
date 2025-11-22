@@ -34,6 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getPassword(),
                 getAuthorities(user));
     }
+    
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         String role = (user.getRole() != null) ? user.getRole() : "USER";

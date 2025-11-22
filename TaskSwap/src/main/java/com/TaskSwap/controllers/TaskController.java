@@ -28,7 +28,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.createTask(request, username));
     }
 
-    @GetMapping
+    @GetMapping 
     public ResponseEntity<List<TaskResponse>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
